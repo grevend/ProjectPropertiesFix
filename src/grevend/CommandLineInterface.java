@@ -25,14 +25,38 @@
 package grevend;
 
 import java.util.Scanner;
+import java.util.function.Consumer;
 
-public class Menu {
+public class CommandLineInterface {
 
+    public static boolean verboseOutput = false;
     private static Scanner reader = new Scanner(System.in);
 
+    public static void init(String[] args, Consumer<Action> consumer) {
+        if (CommandLineInterface.processArguments(args) == Action.MENU) {
+            Action action = showMenu();
+            if (action != Action.NONE) {
+                if (confirmAction("Confirm to start the process")) {
+                    consumer.accept(action);
+                }
+            }
+        }
+        System.out.println();
+    }
+
+    public static Action processArguments(String[] args) {
+        for (String arg : args) {
+            if (arg.equals("-v") || arg.equals("-verbose") || arg.equals("--verbose")) {
+                verboseOutput = true;
+                break;
+            }
+        }
+        return Action.MENU;
+    }
+
     public static Action showMenu() {
-        System.out.println("\nProjectPropertiesFix - 1.0 (Beta) - David Greven\n\n" +
-                "This application upgrades all projects target and source properties in your current directory to Java 8.\n" +
+        System.out.println("\nProjectPropertiesFix - 1.0 - David Greven\n\n" +
+                "This application upgrades all Netbeans projects target and source properties in your current directory to Java 8.\n" +
                 "Please ensure that you have installed JDK 8 or higher before starting the process.\n" +
                 "If you find a bug please report it on github https://github.com/grevend/ProjectPropertiesFix/issues.\n\n" +
                 "Options:\n1. Create backups and update properties\n2. Restore backups\n"
@@ -48,17 +72,15 @@ public class Menu {
         return Action.NONE;
     }
 
-    public static void reportIssue() {
-        System.out.println("Please report your issue with a copy of the stacktrace below to https://github.com/grevend/ProjectPropertiesFix/issues.");
-    }
-
     public static Action showRecommendation(String currentJdkVersion) {
         if (!currentJdkVersion.equals("1.8")) {
             System.out.println("\nJDK versions below or above 8 may lead to incompatibilities with TMC.\n" +
                     "Ensure that your current default JDK version is set to 8 or 1.8.\n" +
-                    "Netbeans: Run > Set Project Configuration > Customize... > Libraries > Java Platform\n"
+                    "Netbeans: Run > Set Project Configuration > Customize... > Libraries > Java Platform"
             );
-            return confirmAction("If you have JDK version 8 setup in Netbeans do you want to change the " + (currentJdkVersion.equals("default_platform") ? "generic " : "") + "configuration '" + currentJdkVersion + "' to JDK 8?") ? Action.CHANGEJDK : Action.NONE;
+            if (System.getProperty("java.version").startsWith("1.8")) {
+                return confirmAction("\nIf you have JDK version 8 setup in Netbeans do you want to change the " + (currentJdkVersion.equals("default_platform") ? "generic " : "") + "configuration '" + currentJdkVersion + "' to JDK 8?") ? Action.CHANGEJDK : Action.NONE;
+            }
         }
         return Action.NONE;
     }
@@ -66,6 +88,10 @@ public class Menu {
     public static boolean confirmAction(String text) {
         System.out.print(text + " (y/n): ");
         return reader.nextLine().trim().toLowerCase().equals("y");
+    }
+
+    public static void reportIssue() {
+        System.out.println("Please report your issue with a copy of the stacktrace below to https://github.com/grevend/ProjectPropertiesFix/issues.");
     }
 
 }

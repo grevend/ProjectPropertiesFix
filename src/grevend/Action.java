@@ -25,5 +25,5 @@
 package grevend;
 
 public enum Action {
-    NONE, UPDATE, RESTORE, CHANGEJDK
+    NONE, MENU, UPDATE, RESTORE, CHANGEJDK
 }

@@ -37,23 +37,18 @@ import java.util.stream.Stream;
 public class Main {
 
     private static String currentJdkVersion = "1.8";
-    private static boolean verboseOutput = false;
 
     public static void main(String[] args) {
-        Action action = Menu.showMenu();
-        if (action != Action.NONE) {
-            if (Menu.confirmAction("Confirm to start the process")) {
-                if (action == Action.UPDATE) {
-                    changeProperties();
-                    if (Menu.showRecommendation(currentJdkVersion) == Action.CHANGEJDK) {
-                        changeJDK();
-                    }
-                } else if (action == Action.RESTORE) {
-                    restoreBackup();
+        CommandLineInterface.init(args, (action -> {
+            if (action == Action.UPDATE) {
+                changeProperties();
+                if (CommandLineInterface.showRecommendation(currentJdkVersion) == Action.CHANGEJDK) {
+                    changeJDK();
                 }
+            } else if (action == Action.RESTORE) {
+                restoreBackup();
             }
-        }
-        System.out.println();
+        }));
     }
 
     private static Stream<Path> findFiles(Path dir) throws IOException {
@@ -62,22 +57,23 @@ public class Main {
 
     private static void processFiles(ConsumerWithIOException<Path> consumer, String... output) {
         try {
+            System.out.println();
             findFiles(Paths.get(System.getProperty("user.dir"))).forEach(file -> {
                 try {
-                    if (verboseOutput) {
+                    if (CommandLineInterface.verboseOutput) {
                         System.out.println(output[0] + " " + file + "...");
                     }
                     consumer.accept(file);
                 } catch (IOException e) {
-                    Menu.reportIssue();
+                    CommandLineInterface.reportIssue();
                     e.printStackTrace();
                 }
             });
-            if (!verboseOutput) {
-                System.out.println("\n" + output[1]);
+            if (!CommandLineInterface.verboseOutput) {
+                System.out.println(output[1]);
             }
         } catch (IOException e) {
-            Menu.reportIssue();
+            CommandLineInterface.reportIssue();
             e.printStackTrace();
         }
     }
@@ -109,11 +105,11 @@ public class Main {
         Path backupPath = Paths.get(path.getParent() + File.separator + "project-backup.properties");
         if (Files.exists(path) && Files.exists(backupPath)) {
             Files.copy(backupPath, path, StandardCopyOption.REPLACE_EXISTING);
-            if (verboseOutput) {
+            if (CommandLineInterface.verboseOutput) {
                 System.out.println("Restored backup " + path + "...");
             }
         } else {
-            if (verboseOutput) {
+            if (CommandLineInterface.verboseOutput) {
                 System.out.println("No backup found for " + path);
             }
         }
