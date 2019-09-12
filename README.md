@@ -13,7 +13,7 @@ Download the latest version of `ProjectPropertiesFix.jar` from https://github.co
 3. Open CLI:
    * Windows: `Shift + Right Click` in the directory and select `Open command window here` or `Open PowerShell here`.
    * MacOS: `Finder > Services > New Terminal at Folder`
-   * Xubuntu: `Open Terminal Here`
+   * Xubuntu: `Shift + Right Click` in the directory and select `Open Terminal Here`.
 4. Input the command below:
 
 ```powershell
